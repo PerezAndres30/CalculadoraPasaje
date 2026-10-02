@@ -2,4 +2,13 @@
     <string name="app_name">Calculadora de Combustible</string>
     <string name="titulo">Combustible por pasajero</string>
     <string name="instruccion">Captura los datos del trayecto para calcular cuánto paga cada persona.</string>
+
+    <string name="combustible_magna">Magna</string>
+    <string name="combustible_premium">Premium</string>
+    <string name="combustible_diesel">Diésel</string>
+
+    <string name="error_distancia">Captura una distancia mayor a 0 km.</string>
+    <string name="error_rendimiento">Captura un rendimiento mayor a 0 km/L.</string>
+    <string name="error_precio">Captura un precio por litro mayor a 0.</string>
+    <string name="error_extras">Los peajes y extras deben ser 0 o más.</string>
 </resources>

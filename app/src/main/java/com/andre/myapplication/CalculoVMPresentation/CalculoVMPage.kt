@@ -1,4 +1,4 @@
-package com.andre.myapplication.CalculoVMPresentation
+package com.andre.myapplication.calculo
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.andre.myapplication.R
 
 @Composable
-fun CalculoPage() {
+fun CalculoVMPage() {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
             modifier = Modifier
