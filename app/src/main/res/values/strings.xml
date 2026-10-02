@@ -13,7 +13,4 @@
     <string name="costo_total_label">Costo total</string>
     <string name="costo_persona_label">Costo por persona</string>
 
-    <string name="nivel_bajo">Viaje económico</string>
-    <string name="nivel_medio">Costo moderado</string>
-    <string name="nivel_alto">Viaje caro</string>
 </resources>

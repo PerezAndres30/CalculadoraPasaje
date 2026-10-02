@@ -12,8 +12,6 @@ import kotlin.math.roundToInt
 const val PASAJEROS_MIN = 1
 const val PASAJEROS_MAX = 10
 
-enum class NivelCosto { INICIAL, BAJO, MEDIO, ALTO }
-
 data class CalculoUiState(
 
     val distancia: String = "",
@@ -25,7 +23,7 @@ data class CalculoUiState(
     val litros: String = "",
     val costoTotal: String = "",
     val costoPorPersona: String = "",
-    val nivel: NivelCosto = NivelCosto.INICIAL
+    val hayResultado: Boolean = false
 )
 
 class CalculoViewModel : ViewModel() {
@@ -71,7 +69,7 @@ class CalculoViewModel : ViewModel() {
             rendimiento == null || rendimiento <= 0.0 ||
             precio == null || precio <= 0.0
         ) {
-            return estado.copy(litros = "", costoTotal = "", costoPorPersona = "", nivel = NivelCosto.INICIAL)
+            return estado.copy(litros = "", costoTotal = "", costoPorPersona = "", hayResultado = false)
         }
 
         val distanciaTotal = distancia * if (estado.viajeRedondo) 2.0 else 1.0
@@ -83,13 +81,8 @@ class CalculoViewModel : ViewModel() {
             litros = formatearNumero(litros),
             costoTotal = formatearMoneda(costoTotal),
             costoPorPersona = formatearMoneda(costoPorPersona),
-            nivel = nivelDe(costoPorPersona)
+            hayResultado = true
         )
-    }
-    private fun nivelDe(costoPorPersona: Double): NivelCosto = when {
-        costoPorPersona <= UMBRAL_BAJO -> NivelCosto.BAJO
-        costoPorPersona <= UMBRAL_MEDIO -> NivelCosto.MEDIO
-        else -> NivelCosto.ALTO
     }
 
     private fun formatearMoneda(monto: Double): String =
@@ -102,9 +95,6 @@ class CalculoViewModel : ViewModel() {
         }.format(valor)
 
     private companion object {
-        const val UMBRAL_BAJO = 100.0
-        const val UMBRAL_MEDIO = 250.0
-
         val LOCALE_MX: Locale = Locale.forLanguageTag("es-MX")
     }
 }

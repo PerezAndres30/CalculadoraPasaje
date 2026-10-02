@@ -85,7 +85,7 @@ fun CalculoVMPage(viewModel: CalculoViewModel = viewModel()) {
             }
 
             // La tarjeta solo aparece cuando ya hay un resultado.
-            if (estado.nivel != NivelCosto.INICIAL) {
+            if (estado.hayResultado) {
                 TarjetaResultado(estado)
             }
         }
@@ -125,19 +125,11 @@ fun FilaResultado(etiqueta: String, valor: String) {
 
 @Composable
 fun TarjetaResultado(estado: CalculoUiState) {
-    // El mensaje depende del nivel que calculó el ViewModel.
-    val mensaje = when (estado.nivel) {
-        NivelCosto.BAJO -> R.string.nivel_bajo
-        NivelCosto.MEDIO -> R.string.nivel_medio
-        else -> R.string.nivel_alto
-    }
-
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(text = stringResource(mensaje), style = MaterialTheme.typography.titleLarge)
             FilaResultado(stringResource(R.string.litros_label), estado.litros)
             FilaResultado(stringResource(R.string.costo_total_label), estado.costoTotal)
             FilaResultado(stringResource(R.string.costo_persona_label), estado.costoPorPersona)
