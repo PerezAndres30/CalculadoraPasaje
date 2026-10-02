@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Calculadora de Combustible</string>
+    <string name="titulo">Combustible por pasajero</string>
+    <string name="instruccion">Captura los datos del trayecto para calcular cuánto paga cada persona.</string>
+</resources>
