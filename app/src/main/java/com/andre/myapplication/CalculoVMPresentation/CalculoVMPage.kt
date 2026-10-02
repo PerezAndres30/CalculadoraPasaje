@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -21,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -127,22 +125,14 @@ fun FilaResultado(etiqueta: String, valor: String) {
 
 @Composable
 fun TarjetaResultado(estado: CalculoUiState) {
-    // El color y el mensaje dependen del nivel que calculó el ViewModel.
-    val colorFondo = when (estado.nivel) {
-        NivelCosto.BAJO -> Color(0xFFC8E6C9)
-        NivelCosto.MEDIO -> Color(0xFFFFF3C4)
-        else -> Color(0xFFFFCDD2)
-    }
+    // El mensaje depende del nivel que calculó el ViewModel.
     val mensaje = when (estado.nivel) {
         NivelCosto.BAJO -> R.string.nivel_bajo
         NivelCosto.MEDIO -> R.string.nivel_medio
         else -> R.string.nivel_alto
     }
 
-    Card(
-        colors = CardDefaults.cardColors(containerColor = colorFondo, contentColor = Color.Black),
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
