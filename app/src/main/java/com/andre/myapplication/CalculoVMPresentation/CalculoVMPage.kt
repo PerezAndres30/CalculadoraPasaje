@@ -29,8 +29,17 @@ import com.andre.myapplication.R
 
 @Composable
 fun CalculoVMPage(viewModel: CalculoViewModel = viewModel()) {
-    // Nos suscribimos al estado del ViewModel: cuando cambia, la pantalla se redibuja.
-    val estado by viewModel.uiState.collectAsStateWithLifecycle()
+    // Observamos cada StateFlow individualmente
+    val distancia by viewModel.distancia.collectAsStateWithLifecycle()
+    val rendimiento by viewModel.rendimiento.collectAsStateWithLifecycle()
+    val precioLitro by viewModel.precioLitro.collectAsStateWithLifecycle()
+    val pasajeros by viewModel.pasajeros.collectAsStateWithLifecycle()
+    val viajeRedondo by viewModel.viajeRedondo.collectAsStateWithLifecycle()
+
+    val litros by viewModel.litros.collectAsStateWithLifecycle()
+    val costoTotal by viewModel.costoTotal.collectAsStateWithLifecycle()
+    val costoPorPersona by viewModel.costoPorPersona.collectAsStateWithLifecycle()
+    val hayResultado by viewModel.hayResultado.collectAsStateWithLifecycle()
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
@@ -47,26 +56,25 @@ fun CalculoVMPage(viewModel: CalculoViewModel = viewModel()) {
             )
             Text(text = stringResource(R.string.instruccion))
 
-            // Cada campo muestra su valor del estado y avisa al ViewModel cuando el usuario escribe.
             CampoDecimal(
-                valor = estado.distancia,
+                valor = distancia,
                 etiqueta = stringResource(R.string.distancia_label),
                 onCambio = viewModel::onDistanciaChange
             )
             CampoDecimal(
-                valor = estado.rendimiento,
+                valor = rendimiento,
                 etiqueta = stringResource(R.string.rendimiento_label),
                 onCambio = viewModel::onRendimientoChange
             )
             CampoDecimal(
-                valor = estado.precioLitro,
+                valor = precioLitro,
                 etiqueta = stringResource(R.string.precio_label),
                 onCambio = viewModel::onPrecioChange
             )
 
-            Text(text = stringResource(R.string.pasajeros_valor, estado.pasajeros))
+            Text(text = stringResource(R.string.pasajeros_valor, pasajeros))
             Slider(
-                value = estado.pasajeros.toFloat(),
+                value = pasajeros.toFloat(),
                 onValueChange = viewModel::onPasajerosChange,
                 valueRange = PASAJEROS_MIN.toFloat()..PASAJEROS_MAX.toFloat(),
                 steps = PASAJEROS_MAX - PASAJEROS_MIN - 1
@@ -79,22 +87,22 @@ fun CalculoVMPage(viewModel: CalculoViewModel = viewModel()) {
             ) {
                 Text(text = stringResource(R.string.viaje_redondo_label))
                 Switch(
-                    checked = estado.viajeRedondo,
+                    checked = viajeRedondo,
                     onCheckedChange = viewModel::onViajeRedondoChange
                 )
             }
 
-            // La tarjeta solo aparece cuando ya hay un resultado.
-            if (estado.hayResultado) {
-                TarjetaResultado(estado)
+            // La tarjeta solo aparece cuando ya hay un resultado válido calculado
+            if (hayResultado) {
+                TarjetaResultado(
+                    litros = litros,
+                    costoTotal = costoTotal,
+                    costoPorPersona = costoPorPersona
+                )
             }
         }
     }
 }
-
-// ---------------------------------------------------------------------------------------
-// Componentes reutilizables: no guardan estado, solo reciben datos y avisan eventos.
-// ---------------------------------------------------------------------------------------
 
 @Composable
 fun CampoDecimal(
@@ -124,15 +132,19 @@ fun FilaResultado(etiqueta: String, valor: String) {
 }
 
 @Composable
-fun TarjetaResultado(estado: CalculoUiState) {
+fun TarjetaResultado(
+    litros: String,
+    costoTotal: String,
+    costoPorPersona: String
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            FilaResultado(stringResource(R.string.litros_label), estado.litros)
-            FilaResultado(stringResource(R.string.costo_total_label), estado.costoTotal)
-            FilaResultado(stringResource(R.string.costo_persona_label), estado.costoPorPersona)
+            FilaResultado(stringResource(R.string.litros_label), litros)
+            FilaResultado(stringResource(R.string.costo_total_label), costoTotal)
+            FilaResultado(stringResource(R.string.costo_persona_label), costoPorPersona)
         }
     }
 }
