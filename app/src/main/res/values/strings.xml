@@ -1,16 +1,29 @@
 <resources>
     <string name="app_name">Calculadora de Combustible</string>
     <string name="titulo">Combustible por pasajero</string>
-    <string name="instruccion">Captura los datos del trayecto para calcular cuánto paga cada persona.</string>
+
+    <string name="combustible_label">Tipo de combustible</string>
+    <string name="combustible_magna">Magna</string>
+    <string name="combustible_premium">Premium</string>
+    <string name="combustible_diesel">Diésel</string>
+    <string name="precio_valor">%1$s por litro</string>
 
     <string name="distancia_label">Distancia (km)</string>
     <string name="rendimiento_label">Rendimiento (km/L)</string>
-    <string name="precio_label">Precio por litro</string>
+    <string name="paga_caseta_label">¿Pagarás caseta?</string>
+    <string name="casetas_label">Total de casetas (MXN)</string>
     <string name="pasajeros_valor">Pasajeros: %d</string>
     <string name="viaje_redondo_label">Viaje redondo</string>
+    <string name="error_valor">Ingresa un número mayor que 0</string>
 
+    <string name="resultado_vacio">Captura distancia y rendimiento para ver el resultado.</string>
     <string name="litros_label">Litros necesarios</string>
+    <string name="casetas_resultado">Casetas incluidas</string>
     <string name="costo_total_label">Costo total</string>
     <string name="costo_persona_label">Costo por persona</string>
+    <string name="nivel_label">Nivel de gasto</string>
+    <string name="nivel_bajo">Bajo</string>
+    <string name="nivel_medio">Medio</string>
+    <string name="nivel_alto">Alto</string>
 
 </resources>

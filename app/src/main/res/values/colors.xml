@@ -7,4 +7,15 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Nivel de gasto -->
+    <color name="costo_bajo">#FF81C784</color>
+    <color name="costo_medio">#FFFFD54F</color>
+    <color name="costo_alto">#FFE57373</color>
+    <color name="texto_tarjeta">#FF1C1B1F</color>
+
+    <!-- Colores de bomba de gasolina -->
+    <color name="magna_verde">#FF2E7D32</color>
+    <color name="premium_rojo">#FFC62828</color>
+    <color name="diesel_gris">#FF37474F</color>
 </resources>
