@@ -41,9 +41,17 @@ import com.andre.myapplication.calculo.CalculoViewModel.NivelCosto
 /**
  * Único Composable que conoce al ViewModel.
  * Baja el estado (valores) y sube los eventos (lambdas).
+ *
+ * Para qué sirve: es el "puente" entre el ViewModel y la pantalla. Lee cada dato del
+ * ViewModel y se lo entrega a CalculoContent, que es quien dibuja. Cuando el usuario
+ * toca algo, CalculoContent avisa por medio de una lambda y aquí se manda al ViewModel.
  */
 @Composable
 fun CalculoVMPage(viewModel: CalculoViewModel = viewModel()) {
+    // viewModel() obtiene (o crea) el ViewModel, y sobrevive a giros de pantalla.
+    // collectAsStateWithLifecycle() convierte cada StateFlow en un estado de Compose:
+    // cuando el valor cambia en el ViewModel, la pantalla se redibuja sola.
+    // También deja de escuchar cuando la app no está visible, para ahorrar recursos.
     val distancia by viewModel.distancia.collectAsStateWithLifecycle()
     val rendimiento by viewModel.rendimiento.collectAsStateWithLifecycle()
     val precioLitro by viewModel.precioLitro.collectAsStateWithLifecycle()
@@ -56,6 +64,7 @@ fun CalculoVMPage(viewModel: CalculoViewModel = viewModel()) {
     val resultado by viewModel.resultado.collectAsStateWithLifecycle()
 
     CalculoContent(
+        // Estado: lo que se muestra
         distancia = distancia,
         rendimiento = rendimiento,
         precioLitro = precioLitro,
@@ -66,6 +75,8 @@ fun CalculoVMPage(viewModel: CalculoViewModel = viewModel()) {
         combustible = combustible,
         errores = errores,
         resultado = resultado,
+        // Eventos: lo que pasa cuando el usuario toca algo.
+        // "viewModel::onXxx" es una referencia a la función del ViewModel.
         onDistanciaChange = viewModel::onDistanciaChange,
         onRendimientoChange = viewModel::onRendimientoChange,
         onCasetasChange = viewModel::onCasetasChange,
@@ -78,6 +89,7 @@ fun CalculoVMPage(viewModel: CalculoViewModel = viewModel()) {
 
 
 // Stateless: solo dibuja lo que recibe y avisa con lambdas. No conoce al ViewModel.
+// Por eso se puede ver en el @Preview con datos inventados, sin necesidad del ViewModel real.
 
 @Composable
 fun CalculoContent(
@@ -99,6 +111,8 @@ fun CalculoContent(
     onViajeRedondoChange: (Boolean) -> Unit,
     onCombustibleChange: (Combustible) -> Unit
 ) {
+    // Scaffold da la estructura base de la pantalla; innerPadding evita que el contenido
+    // quede tapado por las barras del sistema
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
             modifier = Modifier
@@ -115,6 +129,7 @@ fun CalculoContent(
             ) {
                 Encabezado(titulo = stringResource(R.string.titulo))
 
+                // Fila con la etiqueta "Combustible" a la izquierda y el precio por litro a la derecha
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -126,11 +141,13 @@ fun CalculoContent(
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
+                // Chips para elegir Magna, Premium o Diésel
                 SelectorCombustible(
                     seleccionado = combustible,
                     onSeleccion = onCombustibleChange
                 )
 
+                // Distancia y rendimiento lado a lado; weight(1f) reparte el ancho en partes iguales
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CampoDecimal(
                         valor = distancia,
@@ -162,42 +179,53 @@ fun CalculoContent(
                         FilaSwitch(
                             etiqueta = stringResource(R.string.paga_caseta_label),
                             activo = pagaCaseta,
-                            onCambio = onPagaCasetaChange
+                            onCambio = onPagaCasetaChange,
                         )
                         CampoDecimal(
                             valor = casetas,
                             etiqueta = stringResource(R.string.casetas_label),
                             hayError = errores.casetas,
-                            habilitado = pagaCaseta,
+                            habilitado = pagaCaseta, // se desactiva si el switch está apagado
                             onCambio = onCasetasChange,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
 
+                // Slider de pasajeros: muestra el número actual y deja elegir entre el mínimo y el máximo
                 Text(text = stringResource(R.string.pasajeros_valor, pasajeros))
                 Slider(
-                    value = pasajeros.toFloat(),
+                    value = pasajeros.toFloat(), // el Slider trabaja con Float
                     onValueChange = onPasajerosChange,
                     valueRange = PASAJEROS_MIN.toFloat()..PASAJEROS_MAX.toFloat(),
+                    // "steps" son las paradas intermedias; así el slider salta de número entero en entero
                     steps = PASAJEROS_MAX - PASAJEROS_MIN - 1
                 )
-
+                viajeRedondo
                 FilaSwitch(
                     etiqueta = stringResource(R.string.viaje_redondo_label),
                     activo = viajeRedondo,
                     onCambio = onViajeRedondoChange
                 )
+                Profile(
+                    etiqueta = stringResource(R.string.my_name),
+                    etiqueta2 = stringResource(R.string.Matricula),
+                    viajeRedondo= viajeRedondo
+                )
+
             }
 
             // Zona de resultado: fija abajo, siempre a la vista
             Column(modifier = Modifier.padding(16.dp)) {
+                // "when" decide qué mostrar según el estado que mande el ViewModel
                 when (resultado) {
+                    // Aún no hay datos válidos: texto de ayuda
                     EstadoResultado.Inicial -> Text(
                         text = stringResource(R.string.resultado_vacio),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
+                    // Ya hay cálculo: tarjeta con el desglose
                     is EstadoResultado.Calculado -> TarjetaResultado(resultado)
                 }
             }
@@ -205,6 +233,7 @@ fun CalculoContent(
     }
 }
 
+/** Tarjeta de color con el título de la pantalla en la parte superior. */
 @Composable
 fun Encabezado(titulo: String) {
     Card(
@@ -222,6 +251,11 @@ fun Encabezado(titulo: String) {
     }
 }
 
+/**
+ * Campo de texto reutilizable para números decimales.
+ * Muestra el mensaje de error debajo cuando "hayError" es true, y puede desactivarse
+ * con "habilitado" (se usa en el campo de casetas).
+ */
 @Composable
 fun CampoDecimal(
     valor: String,
@@ -237,17 +271,40 @@ fun CampoDecimal(
         label = { Text(text = etiqueta) },
         enabled = habilitado,
         isError = hayError,
+        // Solo se muestra el texto de error si hayError es true; si no, no ocupa espacio (null)
         supportingText = if (hayError) {
             { Text(text = stringResource(R.string.error_valor)) }
         } else {
             null
         },
+        // Abre el teclado numérico con punto decimal
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         singleLine = true,
         modifier = modifier
     )
 }
 
+@Composable
+fun Profile(
+    etiqueta: String,
+    etiqueta2: String,
+    viajeRedondo: Boolean
+){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if(viajeRedondo) {
+            Text(text= etiqueta)
+            Text(text= etiqueta2)
+        }else{
+            null
+        }
+    }
+}
+
+/** Fila reutilizable: una etiqueta a la izquierda y un interruptor (Switch) a la derecha. */
 @Composable
 fun FilaSwitch(
     etiqueta: String,
@@ -264,6 +321,11 @@ fun FilaSwitch(
     }
 }
 
+/**
+ * Fila de chips para elegir el tipo de combustible.
+ * Combustible.entries recorre Magna, Premium y Diésel; solo uno queda seleccionado a la vez.
+ * Cada chip toma su color propio (el de la bomba) definido en el enum.
+ */
 @Composable
 fun SelectorCombustible(
     seleccionado: Combustible,
@@ -276,15 +338,16 @@ fun SelectorCombustible(
                 onClick = { onSeleccion(tipo) },
                 label = { Text(text = stringResource(tipo.nombre)) },
                 colors = FilterChipDefaults.filterChipColors(
-                    labelColor = colorResource(tipo.color),
-                    selectedContainerColor = colorResource(tipo.color),
-                    selectedLabelColor = colorResource(R.color.white)
+                    labelColor = colorResource(tipo.color),               // texto cuando NO está elegido
+                    selectedContainerColor = colorResource(tipo.color),   // fondo cuando SÍ está elegido
+                    selectedLabelColor = colorResource(R.color.white)     // texto cuando SÍ está elegido
                 )
             )
         }
     }
 }
 
+/** Una línea del resultado: la etiqueta a la izquierda y el valor a la derecha. */
 @Composable
 fun FilaResultado(etiqueta: String, valor: String) {
     Row(
@@ -296,6 +359,11 @@ fun FilaResultado(etiqueta: String, valor: String) {
     }
 }
 
+/**
+ * Tarjeta con el resultado del cálculo.
+ * Su color de fondo depende del nivel de costo (bajo, medio o alto), y la barra de progreso
+ * muestra qué tan caro resulta el viaje por persona.
+ */
 @Composable
 fun TarjetaResultado(resultado: EstadoResultado.Calculado) {
     Card(
@@ -310,6 +378,7 @@ fun TarjetaResultado(resultado: EstadoResultado.Calculado) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilaResultado(stringResource(R.string.litros_label), resultado.litros)
+            // "?.let" ejecuta el bloque solo si casetas no es null; si es null, la fila no se dibuja
             resultado.casetas?.let {
                 FilaResultado(stringResource(R.string.casetas_resultado), it)
             }
@@ -320,7 +389,7 @@ fun TarjetaResultado(resultado: EstadoResultado.Calculado) {
                 stringResource(resultado.nivel.etiqueta)
             )
             LinearProgressIndicator(
-                progress = { resultado.progreso },
+                progress = { resultado.progreso }, // valor entre 0.0 y 1.0 calculado en el ViewModel
                 modifier = Modifier.fillMaxWidth(),
                 color = colorResource(R.color.texto_tarjeta),
                 trackColor = colorResource(R.color.white)
@@ -329,6 +398,9 @@ fun TarjetaResultado(resultado: EstadoResultado.Calculado) {
     }
 }
 
+// Vista previa en Android Studio: usa datos inventados (no necesita el ViewModel real).
+// Los valores coinciden con el cálculo: 120 km ida y vuelta = 240 km / 12 km/l = 20 litros;
+// 20 x $24 + $80 de casetas = $560; entre 3 personas = $186.67.
 @Preview(showBackground = true)
 @Composable
 private fun CalculoContentPreview() {
@@ -351,6 +423,7 @@ private fun CalculoContentPreview() {
                 progreso = 0.37f,
                 nivel = NivelCosto.MEDIO
             ),
+            // Lambdas vacías: en la vista previa los botones no hacen nada
             onDistanciaChange = {},
             onRendimientoChange = {},
             onCasetasChange = {},

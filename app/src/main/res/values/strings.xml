@@ -7,6 +7,8 @@
     <string name="combustible_premium">Premium</string>
     <string name="combustible_diesel">Diésel</string>
     <string name="precio_valor">%1$s por litro</string>
+    <string name="my_name">Andres Alexander Perez Gomez</string>
+    <string name="Matricula"> 253400 </string>
 
     <string name="distancia_label">Distancia (km)</string>
     <string name="rendimiento_label">Rendimiento (km/L)</string>
